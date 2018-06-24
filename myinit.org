@@ -1,0 +1,935 @@
+#+STARTUP: content
+* convenient setting
+** sever start
+   #+BEGIN_SRC emacs-lisp
+(require 'server)
+(unless (server-running-p)
+  (server-start))
+   #+END_SRC
+** set ⌘ as meta
+   [[https://qiita.com/hayamiz/items/0f0b7a012ec730351678][MacのiTerm/Emacsでメタキーを快適に使いたい]]
+   #+BEGIN_SRC emacs-lisp
+     (when (eq system-type 'darwin)
+       (setq ns-command-modifier (quote meta)))
+   #+END_SRC
+** hide
+   #+BEGIN_SRC emacs-lisp
+     ;; remove scroll bar
+     (scroll-bar-mode -1)
+     ;; hide startup screen
+     (setq inhibit-startup-message t)
+     ;; hide the tool bar on the top
+     (tool-bar-mode -1)
+   #+END_SRC
+** force save
+   #+BEGIN_SRC emacs-lisp
+(defun my-save ()
+  "Save the buffer even if it is not modified and untabify automatically"
+  (interactive)
+  (untabify (1- (point)) (point-max))
+  (set-buffer-modified-p t)
+  (save-buffer))
+(define-key global-map (kbd "C-x C-s") 'my-save)
+   #+END_SRC
+** y or n
+   #+BEGIN_SRC emacs-lisp
+   (fset 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
+** emphasize parenthesis
+   #+BEGIN_SRC emacs-lisp
+     (show-paren-mode t)
+   #+END_SRC
+** emphasize current line
+   #+BEGIN_SRC emacs-lisp
+     (setq hl-line-face 'underline)
+     (global-hl-line-mode)
+   #+END_SRC
+** show line num
+   #+BEGIN_SRC emacs-lisp
+     (global-linum-mode)
+     (setq linum-format "%4d ")
+   #+END_SRC
+** japanese
+   [[https://qiita.com/bussorenre/items/bbe757ef87e16c3d31ff][突然だがEmacs を始めよう]]
+   #+BEGIN_SRC emacs-lisp
+      (set-language-environment 'Japanese)    ; 日本語環境
+      (set-default-coding-systems 'utf-8-unix)    ; UTF-8 が基本
+      (set-terminal-coding-system 'utf-8-unix)    ; emacs -nw も文字化けしない
+      (setq default-file-namex-coding-system 'utf-8)
+      (setq default-process-coding-system '(utf-8 . utf-8))
+      (prefer-coding-system 'utf-8-unix)
+   #+END_SRC
+** don't generate lock/backup file
+   [[https://qiita.com/bussorenre/items/bbe757ef87e16c3d31ff][突然だがEmacs を始めよう]]
+   #+BEGIN_SRC emacs-lisp
+      (setq create-lockfiles nil)
+      (setq make-backup-files nil)
+      (setq delete-auto-save-files t)
+   #+END_SRC
+** latex
+
+   #+BEGIN_SRC emacs-lisp
+;;auto-complete for latex
+(use-package auto-complete-auctex
+  :ensure t
+  :config 
+  (latex-preview-pane-enable))
+  ;; (add-to-list 'exec-path "/Library/TeX/texbin")
+   #+END_SRC
+** buffer
+   [[http://cestlaz.github.io/posts/using-emacs-4-buffers/#.wsuiwtpowaw][Z-video4]]
+   #+BEGIN_SRC emacs-lisp
+     (defalias 'list-buffers 'ibuffer-other-window)
+     (use-package ace-jump-buffer
+       :ensure t
+       :bind (("C-x M-b". ace-jump-buffer)))
+     (savehist-mode t) ;; save history of minibuffer
+     (setq history-length 5000) ;; size of the history
+   #+END_SRC
+** window
+   #+BEGIN_SRC emacs-lisp
+   (winner-mode 1)
+   (windmove-default-keybindings)
+   (setq windmove-wrap-around t)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :ensure t
+  :init
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (global-set-key [remap other-window] 'ace-window)
+  ;; (global-set-key (kbd "C-x o")  'ace-window)
+  (custom-set-faces
+   '(aw-leading-char-face
+     ((t (:inherit ace-jump-face-foreground :height 2.0))))))
+   #+END_SRC
+
+** ido-mode
+   [[http://cestlaz.github.io/posts/using-emacs-4-buffers/#.WsuiWtPOWAw][Z-video4]]
+   #+BEGIN_SRC emacs-lisp
+     (setq ido-enable-flex-matching t)
+     (setq ido-everywhere t)
+     (ido-mode 1)
+     (use-package ido-vertical-mode
+             :ensure t
+             :config
+             (ido-vertical-mode 1))
+   #+END_SRC
+** minor languages
+   #+BEGIN_SRC emacs-lisp
+     ;;prolog
+     (add-to-list 'auto-mode-alist '("\\.pl?\\'" . prolog-mode))
+     ;;scala
+     (add-to-list 'auto-mode-alist '("\\.scala?\\'" . scala-mode))
+     ;;haskell
+     (add-to-list 'auto-mode-alist '("\\.hs?\\'" . haskell-mode))
+     (setq haskell-indent-level 2)
+   #+END_SRC
+** spell check
+   [[https://qiita.com/catatsuy/items/ae9875706769d4f02317][卒論を英語で書けと言われしまったあなたにおすすめの Emacs の設定]]
+   #+BEGIN_SRC emacs-lisp
+         (setq-default ispell-program-name "aspell")
+         (eval-after-load "ispell"
+           '(add-to-list 'ispell-skip-region-alist '("[^\000-\377]+")))
+         (setq-default ispell-program-name "/usr/local/bin/aspell")
+   #+END_SRC
+** mobile org
+   [[https://skalldan.wordpress.com/2011/08/18/iphone-%25E3%2581%25A7-org-capture/][iPhone で Org Capture]]
+   #+BEGIN_SRC emacs-lisp
+(setq org-directory "~/Dropbox/org")
+
+;; for MobileOrg
+(setq org-mobile-directory "~/Dropbox/MobileOrg")
+(setq org-mobile-files
+      (list "~/Dropbox/org/todo.org"))
+(setq org-mobile-inbox-for-pull "~/Dropbox/org/iphone.org")
+   #+END_SRC
+** transparent
+   #+BEGIN_SRC emacs-lisp
+(defun set-alpha (alpha-num)
+  "set frame parameter 'alpha"
+  (interactive "nAlpha: ")
+  (set-frame-parameter nil 'alpha (cons alpha-num '(80))))
+   #+END_SRC
+** untab
+   #+BEGIN_SRC emacs-lisp
+   (setq-default indent-tabs-mode nil)
+   #+END_SRC
+* convenient packages
+** dumb-jump
+   #+BEGIN_SRC emacs-lisp
+(use-package dumb-jump
+  :bind (("M-g o" . dumb-jump-go-other-window)
+         ("M-g j" . dumb-jump-go)
+         ("M-g i" . dumb-jump-go-prompt)
+         ("M-g x" . dumb-jump-go-prefer-external)
+         ("M-g z" . dumb-jump-go-prefer-external-other-window))
+  :config (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
+  :ensure)
+   #+END_SRC
+** try
+   [[http://cestlaz.github.io/posts/using-emacs-1-setup/#.WtKlgNPOW-k][Z-video1]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package try
+       :ensure t)
+   #+END_SRC
+** which key
+   [[http://cestlaz.github.io/posts/using-emacs-1-setup/#.WtKlgNPOW-k][Z-video1]]
+   #+BEGIN_SRC emacs-lisp
+      (use-package which-key
+              :ensure t
+              :config
+              (which-key-mode))
+   #+END_SRC
+** beacon
+   [[http://cestlaz.github.io/posts/using-emacs-17-misc/#.WtKpPtPOW-k][Z-video17]]
+   #+BEGIN_SRC emacs-lisp
+      (use-package beacon
+              :ensure t
+              :config
+              (beacon-mode 1)
+              (setq beacon-blink-duration 1.0)
+              (setq beacon-blink-when-focused t)
+              (setq beacon-color "#666600"))
+   #+END_SRC
+** hungry-delete
+   [[http://cestlaz.github.io/posts/using-emacs-17-misc/#.WtKpPtPOW-k][Z-video17]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package hungry-delete
+       :ensure t
+       :config
+       (global-hungry-delete-mode))
+   #+END_SRC
+** ein
+   #+BEGIN_SRC emacs-lisp
+     (use-package ein)
+   #+END_SRC
+** rainbow-delimiters/cl-lib/color
+   [[https://qiita.com/megane42/items/ee71f1ff8652dbf94cf7][rainbow-delimiters.el の括弧の色を強調する方法 (たぶん) 決定版]]
+   emphasize parenthesis
+   #+BEGIN_SRC emacs-lisp
+     (use-package rainbow-delimiters
+       :init
+       (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+     (use-package cl-lib)
+     (use-package color)
+     (defun rainbow-delimiters-using-stronger-colors ()
+       (interactive)
+       (cl-loop
+        for index from 1 to rainbow-delimiters-max-face-count
+        do
+        (let ((face (intern (format "rainbow-delimiters-depth-%d-face" index))))
+          (cl-callf color-saturate-name (face-foreground face) 30))))
+     (add-hook 'emacs-startup-hook 'rainbow-delimiters-using-stronger-colors)
+   #+END_SRC
+** lorem-ipsum
+   [[http://cestlaz.github.io/posts/using-emacs-6-swiper/#.WtKvgtPOW-k][Z-video6]]
+   #+BEGIN_SRC emacs-lisp
+     (lorem-ipsum-use-default-bindings)
+   #+END_SRC
+** undo-hist
+   [[https://www-he.scphys.kyoto-u.ac.jp/member/shotakaha/dokuwiki/doku.php?id=toolbox:emacs:undohist:start][undohistの使い方]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package undohist
+       :ensure t
+       :config
+       (setq undohist-directory "~/.emacs.d/undohist")
+       (setq undohist-ignored-files '("/tmp" "/EDITMSG" "/elpa"))
+       (undohist-initialize))
+   #+END_SRC
+** undo-tree
+   [[http://cestlaz.github.io/posts/using-emacs-16-undo-tree/#.WtKxo9POW-k][Z-video16]]
+   [[https://qiita.com/bussorenre/items/bbe757ef87e16c3d31ff][突然だがEmacs を始めよう]]
+   undotree appears by c-x u
+   #+BEGIN_SRC emacs-lisp
+      (use-package undo-tree
+        :ensure t
+        :init
+        (global-undo-tree-mode)
+        :bind
+        ("M-/". undo-tree-redo))
+   #+END_SRC
+** auto-complete
+   [[http://keisanbutsuriya.hateblo.jp/entry/2015/02/08/175005][auto-completeを使ってEmacsの補完を便利にする]]
+   [[http://cestlaz.github.io/posts/using-emacs-8-autocomplete/][Z-video8]]
+   #+BEGIN_SRC emacs-lisp
+                        (use-package auto-complete
+                                :ensure t
+                                :init
+                                (auto-complete-mode t)
+                                (ac-config-default)
+                                ;; :bind (("C-n" . ac-next)
+                                                         ;; ("C-p" . ac-previous))
+                                :config
+                                (global-auto-complete-mode t)
+                                (ac-set-trigger-key "TAB")
+                                (setq ac-use-menu-map t)
+                                (setq ac-use-fuzzy t))
+   #+END_SRC
+** markdown
+   [[https://jblevins.org/projects/markdown-mode/][official page]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package markdown-mode
+       :ensure t
+       :mode (("\\.md\\'" . markdown-mode))
+       :init
+       (add-hook 'markdown-mode-hook 'emmet-mode)
+       :bind (:map markdown-mode-map
+                   ("M-n" . nil)
+                   ("M-p" . nil))
+       :config
+       (setq markdown-enable-math t)
+       (setq markdown-command "multimarkdown")
+       (setq markdown-open-command "/usr/local/bin/mark"))
+   #+END_SRC
+** atomic-chrome
+   #+BEGIN_SRC emacs-lisp
+                 (use-package atomic-chrome
+                         :ensure t
+                         :init
+                         (atomic-chrome-start-server)
+                         :bind (:map atomic-chrome-edit-mode-map
+                                                                         ("C-c C-c" . nil)
+                                                                         ("C-x C-s" . nil))
+                         :config
+                         (setq atomic-chrome-default-major-mode 'markdown-mode))
+   #+END_SRC
+** expand region
+   [[http://cestlaz.github.io/posts/using-emacs-17-misc/#.WtLI49POW34][Z-video17]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package expand-region
+       :ensure t
+       :config
+       (global-set-key (kbd "C-=") 'er/expand-region)
+       (setq shift-select-mode nil))
+   #+END_SRC
+** smartparens
+   #+BEGIN_SRC emacs-lisp
+     (require 'smartparens-config)
+     (smartparens-global-mode t)
+     ;; (sp-pair "<" ">")
+     (sp-pair "$" "$")
+     (sp-pair "「" "」")
+     (define-key sp-keymap (kbd "C-M-k") 'sp-kill-sexp)
+     (define-key sp-keymap (kbd "C-M-s") 'sp-unwrap-sexp)
+     (define-key sp-keymap (kbd "C-M-f") 'sp-forward-sexp)
+     (define-key sp-keymap (kbd "C-M-b") 'sp-backward-sexp)
+     (show-smartparens-global-mode t)
+   #+END_SRC
+** mykie
+   [[http://handlename.hatenablog.jp/entry/2014/01/07/233530][mykie.elが便利]]
+   [[https://github.com/yuutayamada/mykie-el][official github]]
+   #+BEGIN_SRC emacs-lisp
+     (require 'mykie)
+     (setq mykie:use-major-mode-key-override t)
+     (mykie:initialize)
+   #+END_SRC
+** helm
+   [[https://emacs-helm.github.io/helm/#introduction][official page]]
+   [[https://qiita.com/jabberwocky0139/items/86df1d3108e147c69e2c][初心者〜初級者のためのEmacs-Helm事始め : 前編]]
+   [[https://tuhdo.github.io/helm-intro.html][A Package in a league of its own: Helm]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package helm
+       :bind (("C-x C-f". helm-find-files) ;; helm-find-files
+              ("M-x" . helm-M-x)
+              ("C-x C-r" . helm-imenu)
+              ("C-x y" . helm-show-kill-ring)
+              ("C-x b" . helm-mini)
+              :map helm-map
+              ("<tab>". helm-execute-persistent-action)) ;; tab 補完
+       :config
+       (defadvice helm-buffers-sort-transformer (around ignore activate)
+         (setq ad-return-value (ad-get-arg 0)))
+       (setq helm-buffers-fuzzy-matching t)
+       (setq helm-recentf-fuzzy-match    t)
+       )
+   #+END_SRC
+** ace-isearch
+   #+BEGIN_SRC emacs-lisp
+     (use-package ace-isearch
+       :ensure t
+       :config
+       (global-ace-isearch-mode +1))
+     ;; (define-key isearch-mode-map (kbd "M-o") 'helm-multi-swoop-all-from-isearch))
+   #+END_SRC
+** anzu
+   [[http://emacs-jp.github.io/packages/mode-line/anzu][official page]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package anzu
+       :ensure t
+       :config
+       (global-anzu-mode +1))
+   #+END_SRC
+** iedit
+   #+BEGIN_SRC emacs-lisp
+     (use-package iedit)
+   #+END_SRC
+** multiple-cursors
+   [[https://dev.classmethod.jp/tool/emacs-multiple-cursors/][複数カーソル]]
+   [[https://github.com/magnars/multiple-cursors.el#basic-usage][official github]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package multiple-cursors
+       :ensure t
+       :bind (("C-c C-<" . 'mc/edit-lines)
+              ("C->" . 'mc/mark-next-like-this)
+              ("C-<" . 'mc/mark-previous-like-this)
+              ("C-c C->" .'mc/mark-all-like-this)))
+   #+END_SRC
+** flycheck
+   [[http://cestlaz.github.io/posts/using-emacs-12-python/#.WtLXUtPOW34][Z-video12]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package flycheck
+       :ensure t
+       :init
+       (global-flycheck-mode t))
+   #+END_SRC
+** popwin
+   #+BEGIN_SRC emacs-lisp
+     (use-package popwin
+       :ensure t
+       :config
+       (popwin-mode 1))
+   #+END_SRC
+** google translate
+   [[http://blog.shibayu36.org/entry/2016/05/29/123342][emacsで英和辞書や和英辞書をすぐに引けるようにしたい]]
+   #+BEGIN_SRC emacs-lisp
+                 (require 'google-translate)
+                 (require 'google-translate-default-ui)
+
+                 (defvar google-translate-english-chars "[:ascii:]"
+                         "これらの文字が含まれているときは英語とみなす")
+                 (defun google-translate-enja-or-jaen (&optional string)
+                         "regionか現在位置の単語を翻訳する。C-u付きでquery指定も可能"
+                         (interactive)
+                         (setq string
+                                                 (cond ((stringp string) string)
+                                                                         (current-prefix-arg
+                                                                                (read-string "Google Translate: "))
+                                                                         ((use-region-p)
+                                                                                (buffer-substring (region-beginning) (region-end)))
+                                                                         (t
+                                                                                (thing-at-point 'word))))
+                         (let* ((asciip (string-match
+                                                                                         (format "\\`[%s]+\\'" google-translate-english-chars)
+                                                                                         string)))
+                                 (run-at-time 0.1 nil 'deactivate-mark)
+                                 (google-translate-translate
+                                        (if asciip "en" "ja")
+                                        (if asciip "ja" "en")
+                                        string)))
+
+                 (push '("\*Google Translate\*" :height 0.5 :stick t) popwin:special-display-config)
+
+                 (global-set-key (kbd "C-M-t") 'google-translate-enja-or-jaen)
+   #+END_SRC
+** exec-path-from-shell
+   #+BEGIN_SRC emacs-lisp
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+   #+END_SRC
+** dirtree
+   #+BEGIN_SRC emacs-lisp
+(use-package dirtree
+  :ensure t
+  :config)
+   #+END_SRC
+* org
+** keybind
+   [[https://qiita.com/takaxp/items/a5a3383d7358c58240d0][org-mode のキーバインド、その先]]
+   #+BEGIN_SRC emacs-lisp
+   (setq org-use-speed-commands t)
+   (define-key org-mode-map (kbd "C-M-t") nil)
+   #+END_SRC
+
+** basic setup
+   #+BEGIN_SRC emacs-lisp
+    (setq org-src-fontify-natively t)
+    (setq org-src-preserve-indentation t)
+    (eval-after-load "org"
+    '(require 'ox-md nil t))
+   #+END_SRC
+** org-bullets
+   [[%09%09http://cestlaz.github.io/posts/using-emacs-2-org/#.WtKm4dPOW-k][Z-video2]]
+   #+BEGIN_SRC emacs-lisp
+     (use-package org-bullets
+       :ensure t
+       :config
+       (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+   #+END_SRC
+** org-babel python
+   [[https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html][official]]
+   #+BEGIN_SRC emacs-lisp
+   (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
+   #+END_SRC
+** org-agenda
+   #+BEGIN_SRC emacs-lisp
+(setq org-agenda-files '("~/Dropbox/org/todo.org"))
+(global-set-key (kbd "C-c a") 'org-agenda)
+   #+END_SRC
+** export
+   [[https://gongzhitaao.org/orgcss/#orgec33795][CSS for Org-exported HTML]]
+
+* mode-line
+** show time/column num
+   #+BEGIN_SRC emacs-lisp
+     (display-time)
+     (column-number-mode t)
+   #+END_SRC
+** smart-mode-line
+   [[https://qiita.com/blue0513/items/99476f4ae51f17600636][EmacsのMode Lineを強化する]]
+   #+BEGIN_SRC emacs-lisp
+      (defvar sml/no-confirm-load-theme t)
+      (defvar sml/theme 'dark) ;; お好みで
+      (defvar sml/shorten-directory -1) ;; directory pathはフルで表示されたいので
+      (sml/setup)
+   #+END_SRC
+** light up when saved
+   [[https://qiita.com/blue0513/items/99476f4ae51f17600636][EmacsのMode Lineを強化する]]
+   #+BEGIN_SRC emacs-lisp
+     (setq ring-bell-function 'ignore)
+     (setq ring-bell-function
+           (lambda ()
+             (let ((orig-fg (face-background 'mode-line)))
+               (set-face-background 'mode-line "purple4")
+               (run-with-idle-timer 0.1 nil
+                                    (lambda (fg) (set-face-background 'mode-line fg))
+                                    orig-fg))))
+     (add-hook 'after-save-hook
+               (lambda ()
+                 (let ((orig-fg (face-background 'mode-line)))
+                   (set-face-background 'mode-line "white")
+                   (run-with-idle-timer 0.1 nil
+                                        (lambda (fg) (set-face-background 'mode-line fg))
+                                        orig-fg))))
+   #+END_SRC
+** total nums of lines
+   [[https://qiita.com/blue0513/items/99476f4ae51f17600636][EmacsのMode Lineを強化する]]
+   #+BEGIN_SRC emacs-lisp
+      (require 'total-lines)
+      (global-total-lines-mode t)
+      (defun my-set-line-numbers ()
+        (setq-default mode-line-front-space
+              (append mode-line-front-space
+                  '((:eval (format " (%d)" (- total-lines 1))))))) ;; 「" (%d)"」の部分はお好みで
+      (add-hook 'after-init-hook 'my-set-line-numbers)
+   #+END_SRC
+** diminish
+   [[https://github.com/myrjola/diminish.el][official github]]
+   #+BEGIN_SRC emacs-lisp
+                        (require 'diminish)
+                        (diminish 'which-key-mode)
+                        (diminish 'hungry-delete-mode)
+                        (diminish 'beacon-mode)
+                        (diminish 'flycheck-mode)
+                        (diminish 'undo-tree-mode)
+                        (diminish 'auto-complete-mode)
+                        (diminish 'rainbow-mode)
+                        (diminish 'smartparens-mode)
+                        (diminish 'anzu-mode)
+                        (diminish 'ace-isearch-mode)
+   #+END_SRC
+
+* personal keybind
+** change default key bind
+   #+BEGIN_SRC emacs-lisp
+     (define-key global-map (kbd "C-t") 'other-window)
+     (global-set-key (kbd "\M-y") 'yank-pop)
+     (global-set-key "\C-h" 'backward-delete-char-untabify)
+     (global-set-key "\M-h" 'backward-kill-word)
+     (global-set-key "\C-xh" 'help-command)
+     (global-set-key "\C-xa" 'mark-whole-buffer)
+     (global-set-key (kbd "C-.") 'repeat)
+     (global-set-key (kbd "\r") 'newline-and-indent) ;; new line to be indented
+     (define-key global-map "\M-h" nil)
+     (global-set-key (kbd "C-M-SPC") 'mark-paragraph);;mark paragraph
+     (global-set-key "\M-n" (lambda () (interactive) (scroll-up 1)))
+     (global-set-key "\M-p" (lambda () (interactive) (scroll-down 1)))
+     (global-set-key (kbd "C-S-n") (lambda () (interactive) (forward-line 5)))
+     (global-set-key (kbd "C-S-p") (lambda () (interactive) (previous-line 5)))
+   #+END_SRC
+
+   #+RESULTS:
+   | lambda | nil | (interactive) | (previous-line 5) |
+
+** copy/cut line
+   #+BEGIN_SRC emacs-lisp
+     (mykie:set-keys nil
+       "C-w"
+       :default     (kill-region (line-beginning-position)(line-end-position))
+       :region      kill-region
+       "M-w"
+       :default     (kill-ring-save (line-beginning-position)(line-end-position))
+       :region      kill-ring-save)
+   #+END_SRC
+** kill previous part of line
+   [[http://ama-ch.hatenablog.com/entry/20090114/1231918903][Emacsでカーソル位置から行頭まで削除する方法]]
+   #+BEGIN_SRC emacs-lisp
+     (defun backward-kill-line (arg)
+       "Kill chars backward until encountering the end of a line."
+       (interactive "p")
+       (kill-line 0))
+     (global-set-key (kbd "C-S-k") 'backward-kill-line)
+   #+END_SRC
+** duplicate line/region
+   [[http://ongaeshi.hatenablog.com/entry/20120404/1333505028][Emacsに現在行や選択範囲を複製するduplicate-thing.elをパワーアップさせました]]
+   #+BEGIN_SRC emacs-lisp
+     (defun duplicate-thing (n)
+       (interactive "P")
+       (save-excursion
+         (let (start
+               end
+               (with-comment-out (consp n)))
+           (cond (mark-active
+                  (setq start (region-beginning) end (region-end)))
+                 (t
+                  (beginning-of-line)
+                  (setq start (point))
+                  (forward-line)
+                  (setq end (point))))
+           (kill-ring-save start end)
+           (if with-comment-out
+               (progn
+                 (comment-region start end)
+                 (yank))
+             (dotimes (i (or n 1))
+               (yank))))))
+     (global-set-key (kbd "M-c") 'duplicate-thing)
+   #+END_SRC
+** move line/region
+   [[https://qiita.com/ShingoFukuyama/items/fc51a32e84fd84261565][現在行をそのまま上下に連続移動させる]]
+   #+BEGIN_SRC emacs-lisp
+     (defun move-line-down ()
+       (interactive)
+       (let ((col (current-column)))
+         (save-excursion
+           (forward-line)
+           (transpose-lines 1))
+         (forward-line)
+         (move-to-column col)))
+
+     (defun move-line-up ()
+       (interactive)
+       (let ((col (current-column)))
+         (save-excursion
+           (forward-line)
+           (transpose-lines -1)
+           )
+         (forward-line -1)
+         (move-to-column col)))
+
+     (defun move-region-down ()
+       (interactive)
+       (let ((col (current-column)))
+         (kill-region (region-beginning) (region-end))
+         (forward-line 1)
+         (yank)
+         (set-mark  (region-beginning) (region-end))
+         (move-to-column col)))
+
+     (defun move-region-up ()
+       (interactive)
+       (let ((col (current-column)))
+         (kill-region (region-beginning) (region-end))
+         (forward-line -1)
+         (yank)
+         (set-mark (region-beginning) (region-end))
+         (move-to-column col)))
+
+     (mykie:set-keys nil
+       "M-P"
+       :default     move-line-up
+       :region      move-region-up
+       "M-N"
+       :default     move-line-down
+       :region      move-region-down
+       )
+   #+END_SRC
+** eshell clear
+   #    #+BEGIN_SRC emacs-lisp
+   #      (defun eshell/clear ()
+   #        "Clear the eshell buffer."
+   #        (let ((inhibit-read-only t))
+   #     (erase-buffer)
+   #     (eshell-send-input)))
+   #    #+END_SRC
+** narrow/widen dwim
+   #+BEGIN_SRC emacs-lisp
+     ; if you're windened, narrow to the region, if you're narrowed, widen
+     ; bound to C-x n
+     (defun narrow-or-widen-dwim (p)
+       "If the buffer is narrowed, it widens. Otherwise, it narrows intelligently.
+     Intelligently means: region, org-src-block, org-subtree, or defun,
+     whichever applies first.
+     Narrowing to org-src-block actually calls `org-edit-src-code'.
+
+     With prefix P, don't widen, just narrow even if buffer is already
+     narrowed."
+       (interactive "P")
+       (declare (interactive-only))
+       (cond ((and (buffer-narrowed-p) (not p)) (widen))
+             ((region-active-p)
+              (narrow-to-region (region-beginning) (region-end)))
+             ((derived-mode-p 'org-mode)
+              ;; `org-edit-src-code' is not a real narrowing command.
+              ;; Remove this first conditional if you don't want it.
+              (cond ((ignore-errors (org-edit-src-code))
+                     (delete-other-windows))
+                    ((org-at-block-p)
+                     (org-narrow-to-block))
+                    (t (org-narrow-to-subtree))))
+             (t (narrow-to-defun))))
+
+     ;; (define-key endless/toggle-map "n" #'narrow-or-widen-dwim)
+     ;; This line actually replaces Emacs' entire narrowing keymap, that's
+     ;; how much I like this command. Only copy it if that's what you want.
+     (define-key ctl-x-map "n" #'narrow-or-widen-dwim)
+   #+END_SRC
+** time-stamp
+   #+BEGIN_SRC emacs-lisp
+    (defun insert-current-date () (interactive)
+    (insert (shell-command-to-string "echo -n $(date +%Y-%m-%d)")))
+   #+END_SRC
+* front-end
+** web-mode
+   [[http://web-mode.org][official page]]
+   #+BEGIN_SRC emacs-lisp
+(require 'web-mode)
+     ;;; 適用する拡張子
+(add-to-list 'auto-mode-alist '("\\.[agj]sp\\'"  . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'"  . web-mode))
+(add-to-list 'auto-mode-alist '("\\.djhtml\\'"   . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'"      . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'"    . web-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'"       . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'"      . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.php\\'"      . web-mode))
+(add-to-list 'auto-mode-alist '("\\.phtml\\'"    . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\'"      . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'"      . web-mode))
+(define-key web-mode-map (kbd "C-;") nil)
+
+(defun web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-html-offset   2)
+  (setq web-mode-style-padding 2)
+  (setq web-mode-css-offset    2)
+  (setq web-mode-script-offset 2)
+  (setq web-mode-java-offset   2)
+  (setq web-mode-asp-offset    2))
+
+(add-hook 'web-mode-hook 'web-mode-hook)
+(setq web-mode-enable-css-colorization t)
+
+(set-face-attribute 'default            nil :background "grey14" :foreground "ivory1")
+(set-face-attribute 'fringe             nil :background "grey20")
+(set-face-attribute 'highlight          nil :background "grey16")
+(set-face-attribute 'mode-line          nil :box nil :background "grey26" :foreground "grey50")
+(set-face-attribute 'mode-line-inactive nil :background "grey40")
+
+(set-face-attribute 'web-mode-html-tag-face          nil :foreground "#777777")
+(set-face-attribute 'web-mode-html-tag-custom-face   nil :foreground "#8a9db4")
+(set-face-attribute 'web-mode-html-tag-bracket-face  nil :foreground "#aaaaaa")
+(set-face-attribute 'web-mode-html-attr-name-face    nil :foreground "#aaaaaa")
+(set-face-attribute 'web-mode-html-attr-equal-face   nil :foreground "#eeeeee")
+(set-face-attribute 'web-mode-html-attr-value-face   nil :foreground "rosybrown")
+(set-face-attribute 'web-mode-html-attr-custom-face  nil :foreground "#8a9db4")
+(set-face-attribute 'web-mode-html-attr-engine-face  nil :foreground "#00f5ff")
+(set-face-attribute 'web-mode-comment-face           nil :foreground "Firebrick")
+(set-face-attribute 'web-mode-constant-face          nil :foreground "aquamarine")
+(set-face-attribute 'web-mode-css-at-rule-face       nil :foreground "plum4")
+(set-face-attribute 'web-mode-css-selector-face      nil :foreground "orchid3")
+(set-face-attribute 'web-mode-css-pseudo-class-face  nil :foreground "plum2")
+(set-face-attribute 'web-mode-css-property-name-face nil :foreground "Pink3")
+(set-face-attribute 'web-mode-preprocessor-face      nil :foreground "DarkSeaGreen")
+(set-face-attribute 'web-mode-block-delimiter-face   nil :foreground "DarkSeaGreen")
+(set-face-attribute 'web-mode-block-control-face     nil :foreground "SeaGreen")
+(set-face-attribute 'web-mode-variable-name-face     nil :foreground "Burlywood")
+
+;;smartrep for web-mode
+(require 'smartrep)
+(smartrep-define-key web-mode-map "C-c"
+  '(("C-p" . web-mode-element-parent)
+    ("C-n" . web-mode-tag-match)
+    ("C-l" . web-mode-element-previous)))
+   #+END_SRC
+** emmet
+   #+BEGIN_SRC emacs-lisp
+     ;; define css-mode-hook
+      (defcustom css-mode-hook nil
+        "*Hook to be run when `css-mode' is entered."
+        :group 'css
+        :type  'hook)
+     (require 'emmet-mode)
+     (add-hook 'web-mode-hook 'emmet-mode)
+     (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
+     (add-hook 'css-mode-hook  'emmet-mode) ;; enable Emmet's css abbreviation.
+     (add-hook 'emmet-mode-hook (lambda () (setq emmet-indentation 2)))
+     (add-hook 'emmet-mode-hook 'rainbow-mode)
+     (define-key emmet-mode-keymap (kbd "C-<return>") 'emmet-expand-line)
+     (define-key emmet-mode-keymap (kbd "C-c w") 'emmet-wrap-with-markup)
+     (define-key emmet-mode-keymap (kbd "C-j") nil)
+   #+END_SRC
+** js2-mode
+   #+BEGIN_SRC emacs-lisp
+     (require 'js2-mode)
+     (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
+   #+END_SRC
+* ruby
+  #+BEGIN_SRC emacs-lisp
+    ;; https://qiita.com/hiconyan/items/582e27128decfe9d249e
+    ;; ruby
+    (autoload 'ruby-mode "ruby-mode")
+    (autoload 'ruby-electric-mode "ruby-electric")
+    (global-set-key (kbd "C-c r b") 'ruby-mode)
+    (add-to-list 'auto-mode-alist '("\\.rb$". ruby-mode))
+    (setq ruby-deep-indent-paren-style nil)
+    (add-to-list 'interpreter-mode-alist '("ruby" . ruby-mode))
+    (add-hook 'ruby-mode-hook #'(lambda ()
+                 ;; 括弧の自動挿入
+                 (ruby-electric-mode)
+                 ;; インデント幅: 2
+                 (setq ruby-indent-level 2)
+                 ;; 改行時に自動インデント
+                 (define-key ruby-mode-map (kbd "C-j") (kbd "C-m") 'ruby-reindent-then-newline-and-indent)))
+    ;; defadviceで既存のインデント関数ruby-indent-lineに対する追加処理を定義する
+    ;; after -> 既存の関数の処理の後に実行される
+    ;; unindent-closing-paren -> このアドバイスの名前
+    ;; activate -> このアドバイスがすぐに有効になる
+    (defadvice ruby-indent-line (after unindent-closing-paren activate)
+      (let ((column (current-column))
+            indent offset)
+        (save-excursion
+          ;; ポイント(カーソル)をインデントの位置に移動する
+          (back-to-indentation)
+          ;; syntax-ppssはparserの状態を表すリストを返す
+          ;; 1番目の要素は括弧の深さ、2番目の要素は一番内側の開始括弧の位置を表す
+          (let ((state (syntax-ppss)))
+            ;; ポイントの初期状態とインデントの位置との差をoffsetとする
+            (setq offset (- column (current-column)))
+            ;; ポイントの位置の文字が')'で括弧の中にある場合
+            (when (and (eq (char-after) ?\))
+                       (not (zerop (car state))))
+              ;; 一番内側の'('に移動
+              (goto-char (cadr state))
+              ;; インデント幅を取得
+              (setq indent (current-indentation)))))
+        (when indent
+          ;; インデントする
+          (indent-line-to indent)
+          ;; オフセットが存在する場合、その分だけポイントを移動する
+          ;; つまり、インデント修正後のポイントのあるべき場所に戻る
+          (when (> offset 0) (forward-char offset)))))
+    ;; inf-ruby
+    (autoload 'inf-ruby-minor-mode "inf-ruby")
+    (setenv "PAGER" (executable-find "cat"))
+    (add-hook 'ruby-mode-hook #'(lambda ()
+                 (inf-ruby-minor-mode)
+                 (inf-ruby-switch-setup)))
+    ;; rspec-mode
+    (autoload 'rspec-mode "rspec-mode")
+    (add-hook 'ruby-mode-hook 'rspec-mode)
+    ;; flycheck
+    (autoload 'flycheck-mode "flycheck")
+    (add-hook 'ruby-mode-hook 'flycheck-mode)
+    (setq flycheck-check-syntax-automatically '(idle-change mode-enabled new-line save))
+  #+END_SRC
+* python
+  When you update jedi.el, open emacs by the command emacs & and M-x jedi:install-server
+  [[http://keisanbutsuriya.hateblo.jp/entry/2015/12/08/011832][Jediを使ってPythonのコード補完]]
+  [[https://benevolent0505.hatenablog.com/entry/2017/06/25/193529][Python用Emacsの設定を書いた]]
+  [[%09http://ksknw.hatenablog.com/entry/2016/05/07/171239][PythonをEmacsで書く+α]]
+  [[https://org-technology.com/posts/emacs-elpy.html][個人的な Python 用の Emacs の設定]]
+  #+BEGIN_SRC emacs-lisp
+        (autoload 'python-mode "python-mode" "Python Mode." t)
+        (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+        (add-to-list 'interpreter-mode-alist '("python" . python-mode))
+
+        (use-package python-mode
+          :ensure t
+          :bind ((:map python-mode-map ("S-tab". python-indent-shift-left)))
+          :config
+          '(lambda()
+             (setq indent-tabs-mode nil)
+             (setq indent-level 4)
+             (setq python-indent 4)
+             (setq tab-width 4)))
+
+        (use-package elpy
+          :ensure t
+          :config
+          (elpy-enable)
+          (setq elpy-rpc-backend "jedi")
+          (auto-complete-mode -1))
+
+        (use-package jedi
+          :ensure t
+          :init
+          (add-hook 'python-mode-hook 'jedi:setup)
+          (add-to-list 'ac-sources 'ac-source-filename)
+          (add-to-list 'ac-sources 'ac-source-jedi-direct)
+          :bind ((:map python-mode-map
+                       ("\C-ct". jedi:goto-definitionn)
+                       ("\C-cb". jedi:goto-definition-pop-marker)
+                       ("\C-cr". helm-jedi-related-names))
+                 (:map jedi-mode-map
+                       ("<C-tab> . nil")))
+          :config
+          (setq jedi:complete-on-dot t)
+          (setq ac-sources
+                (delete 'ac-source-words-in-same-mode-buffers ac-sources)))
+  #+END_SRC
+* typescript
+** typescript-mode
+   #+BEGIN_SRC emacs-lisp
+(require 'typescript-mode)
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+(setq typescript-indent-level 2)
+   #+END_SRC
+** angular 
+   #+BEGIN_SRC emacs-lisp
+(require 'ng2-mode)
+   #+END_SRC
+** tss
+   #+BEGIN_SRC emacs-lisp
+   (require 'typescript)
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+
+(require 'tss)
+(setq tss-popup-help-key "C-:")
+(setq tss-jump-to-definition-key "C-c g")
+(setq tss-implement-definition-key "C-c i")
+(tss-config-default)
+
+(setq typescript-indent-level 2)
+   #+END_SRC
+** tide
+   #+BEGIN_SRC emacs-lisp
+(defun setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  ;; company is an optional dependency. You have to
+  ;; install it separately via package-install
+  ;; `M-x package-install [ret] company`
+  (company-mode +1))
+
+;; aligns annotation to the right hand side
+(setq company-tooltip-align-annotations t)
+
+;; formats the buffer before saving
+(add-hook 'before-save-hook 'tide-format-before-save)
+
+(add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+;; https://github.com/ananthakumaran/tide
+   #+END_SRC
