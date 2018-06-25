@@ -434,6 +434,11 @@
   :ensure t
   :config)
    #+END_SRC
+** magit
+   [[https://qiita.com/maueki/items/70dbf62d8bd2ee348274][参考サイト]]
+   #+BEGIN_SRC emacs-lisp
+   (global-set-key (kbd "C-x g") 'magit-status)
+   #+END_SRC
 * org
 ** keybind
    [[https://qiita.com/takaxp/items/a5a3383d7358c58240d0][org-mode のキーバインド、その先]]
@@ -469,8 +474,31 @@
 (setq org-agenda-files '("~/Dropbox/org/todo.org"))
 (global-set-key (kbd "C-c a") 'org-agenda)
    #+END_SRC
-** export
+** export css
    [[https://gongzhitaao.org/orgcss/#orgec33795][CSS for Org-exported HTML]]
+** export markdown 
+   [[http://aki2o.hatenablog.jp/entry/2014/02/27/org-mode%25E3%2581%25A7%25E4%25BB%2596%25E5%25BD%25A2%25E5%25BC%258F%25E3%2581%25B8%25E3%2581%25AE%25E3%2582%25A8%25E3%2582%25AF%25E3%2582%25B9%25E3%2583%259D%25E3%2583%25BC%25E3%2583%2588%25E6%2599%2582%25E3%2581%25AE%25E5%2587%25A6%25E7%2590%2586%25E3%2582%2592%25E3%2582%25AB%25E3%2582%25B9%25E3%2582%25BF%25E3%2583%259E][参考サイト]]
+   #+BEGIN_SRC emacs-lisp
+(add-to-list 'org-export-backends 'md)
+(require 'ox)
+;; (require 'ox-md)
+
+(defun ~org-md-src-block (src-block contents info)
+  (let* ((lang (org-element-property :language src-block))
+         (lang (cond ((not (stringp lang))   "")
+                     ((string= lang "emacs-lisp") "lisp")
+                     (t                      lang)))
+         (value (org-element-property :value src-block)))
+    (format "```%s\n%s```" lang value)))
+
+(dolist (b org-export-registered-backends)
+  (when (eq (org-export-backend-name b) 'md)
+    (let* ((tr-alist (org-export-backend-transcoders b))
+           (src (assq 'src-block tr-alist))
+           (tr-alist (delq src tr-alist)))
+      (push '(src-block . ~org-md-src-block) tr-alist)
+      (setf (org-export-backend-transcoders b) tr-alist))))
+   #+END_SRC
 
 * mode-line
 ** show time/column num
